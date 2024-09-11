@@ -1,0 +1,24 @@
+[project]
+name = "gym-gridworlds"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.9.2",
+    "ipykernel>=6.29.5",
+    "numpy>=2.1.1",
+    "gymnasium>=0.29.1",
+    "gym-gridworlds",
+    "pygame>=2.6.0",
+]
+
+dynamic = ["license", "authors", "entry-points"]
+
+[tool.uv.sources]
+gym-gridworlds = { workspace = true }
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
