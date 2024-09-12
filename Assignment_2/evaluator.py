@@ -16,8 +16,8 @@ class Evaluator:
         self.n_states: int = env.observation_space.n
         self.n_actions: int = env.action_space.n
 
-        self.state_values: np.ndarray = np.zeros(self.n_states)
-        self.q_values: np.ndarray = np.zeros((self.n_states, self.n_actions))
+        self.state_values: np.ndarray = np.zeros(self.n_states) + initialization
+        self.q_values: np.ndarray = np.zeros((self.n_states, self.n_actions)) + initialization
         self.gamma: float = gamma
         self.threshold: float = threshold
         self.errors: List[float] = []
