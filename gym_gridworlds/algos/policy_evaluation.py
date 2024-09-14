@@ -152,9 +152,9 @@ class PolicyEvaluation(BaseAlgo):
             evaluation_errors.append(np.sum(iteration_error))
 
             if n_iter is not None:
+                counter += 1
                 if counter >= n_iter:
-                    return self.state_values, np.array(evaluation_errors)
-                counter += 1                
+                    return self.state_values, np.array(evaluation_errors)            
 
         return self.state_values, np.array(evaluation_errors)
     
