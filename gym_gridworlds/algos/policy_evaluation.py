@@ -26,6 +26,7 @@ class PolicyEvaluation(BaseAlgo):
             transitions[state, action, next_state] indicates the probability of
             transitioning to the next state from the current state when taking a given action.
         n_states (int): The total number of states in the MDP.
+        n_actions (int): The total number of actions in the MDP.
         initialization (float): The initial value assigned to each state value during evaluation.
     """
 
@@ -72,6 +73,10 @@ class PolicyEvaluation(BaseAlgo):
 
         This method initializes the state values to a specified value,
         preparing the object for evaluation computations.
+
+        Args:
+            initialization (float, optional): Initialization value for state values.
+                Defaults to 0.
         """
         self.initialization = initialization if initialization else self.initialization
         self.state_values: np.ndarray = (
@@ -83,7 +88,7 @@ class PolicyEvaluation(BaseAlgo):
         """Evaluates the policy using a closed-form solution of the Bellman equation.
 
         This method solves the value function using a matrix inversion approach, it solves
-        the linear system V = (I - gamma * P_pi)^(-1) * R_pi, accounting for terminal states
+        the system V = (I - gamma * P_pi)^(-1) * R_pi, accounting for terminal states
         by adjusting transition probabilities and rewards appropriately.
 
         Returns:
@@ -100,9 +105,8 @@ class PolicyEvaluation(BaseAlgo):
         V = np.linalg.solve(I - self.gamma * P_pi, R_pi)
         return V
 
-    def v_pi_iterative_form(self, threshold: float = 0.01) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Iteratively evaluates the policy until convergence using the Bellman equation.
+    def v_pi_iterative_form(self, threshold: float = 0.01, n_iter: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray]:
+        """Iteratively evaluates the policy until convergence using the Bellman equation.
 
         This method performs iterative updates of the state values, accounting
         for terminal states by directly setting values based on immediate rewards
@@ -112,6 +116,7 @@ class PolicyEvaluation(BaseAlgo):
         Args:
             threshold (float, optional): Convergence threshold for stopping criterion,
                 determining when the updates have become sufficiently small. Defaults to 0.01.
+            n_iter (int, optional): Number of iterations for GPI. Defaults to None.
 
         Returns:
             Tuple[np.ndarray, np.ndarray]: A tuple containing:
@@ -120,6 +125,7 @@ class PolicyEvaluation(BaseAlgo):
         """
         delta: float = np.inf
         evaluation_errors = []
+        counter = 0 if n_iter is not None else None
 
         while delta >= threshold:
             current_value = self.state_values.copy()
@@ -144,6 +150,11 @@ class PolicyEvaluation(BaseAlgo):
             iteration_error = np.abs(current_value - self.state_values)
             delta = np.max([0, np.max(iteration_error)])
             evaluation_errors.append(np.sum(iteration_error))
+
+            if n_iter is not None:
+                if counter >= n_iter:
+                    return self.state_values, np.array(evaluation_errors)
+                counter += 1                
 
         return self.state_values, np.array(evaluation_errors)
     
