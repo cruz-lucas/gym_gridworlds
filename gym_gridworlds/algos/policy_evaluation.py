@@ -82,7 +82,7 @@ class PolicyEvaluation(BaseAlgo):
         self.state_values: np.ndarray = (
             np.zeros((self.n_states, 1)) + self.initialization
         )
-        self.q_values = np.zeros((self.n_states, self.n_actions))
+        self.q_values = np.zeros((self.n_states, self.n_actions)) + self.initialization
 
     def v_pi_closed_form(self) -> np.ndarray:
         """Evaluates the policy using a closed-form solution of the Bellman equation.
@@ -158,11 +158,12 @@ class PolicyEvaluation(BaseAlgo):
 
         return self.state_values, np.array(evaluation_errors)
     
-    def q_pi_iterative_form(self, threshold: float = 0.01) -> Tuple[np.ndarray, np.ndarray]:
+    def q_pi_iterative_form(self, threshold: float = 0.01, n_iter: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray]:
         """Iteratively evaluates the action-state values until convergence using the Bellman equation.
 
         Args:
             threshold (float, optional): Convergence threshold for stopping criterion.
+            n_iter (int, optional): Number of iterations for GPI. Defaults to None.
 
         Returns:
             Tuple[np.ndarray, np.ndarray]: A tuple containing:
@@ -171,6 +172,7 @@ class PolicyEvaluation(BaseAlgo):
         """
         delta: float = np.inf
         evaluation_errors = []
+        counter = 0 if n_iter is not None else None
         while delta >= threshold:
             delta = 0.0
             iteration_error: float = 0.0
@@ -187,4 +189,9 @@ class PolicyEvaluation(BaseAlgo):
                 delta = max(delta, state_error)
                 iteration_error += state_error
             evaluation_errors.append(iteration_error)
+
+            if n_iter is not None:
+                counter += 1
+                if counter >= n_iter:
+                    return self.state_values, np.array(evaluation_errors)  
         return self.q_values, evaluation_errors
